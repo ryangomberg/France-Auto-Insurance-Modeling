@@ -1,1 +1,167 @@
 7 - Pure Premium: Relativity and Comparison
+Dashed lines indicate the cutoff for each code block.
+
+---------- CODE ----------
+
+# Comparing Pure Premiiums among FreqxSev and Tweedie
+tweedie_16table = summary(tweedie_glm16)
+
+purepremium_table <- data.frame(
+  Variable = rownames(gamma_sum$coefficients),
+  PoissonRelativity = round(exp(poistable$coefficients[, "Estimate"]), 2),
+  GammaRelativity = round(exp(gamma_sum$coefficients[, "Estimate"]), 2),
+  FreqxSev = round(exp(poistable$coefficients[, "Estimate"]) *
+             exp(gamma_sum$coefficients[, "Estimate"]), 2),
+  TweedieRelativity = round(exp(tweedie_16table$coefficients[, "Estimate"]), 2)
+)
+purepremium_table
+
+--------------------------
+
+# Predicting on Test Set - Freq x Sev
+freq_pred <- predict(FreqPoisson,
+                     newdata = test,
+                     type = "response")
+nb_pred <- predict(FreqNB,
+                     newdata = test,
+                     type = "response")
+sev_pred <- predict(sevGamma,
+                    newdata = test,
+                    type = "response")
+pp_pred_freqsev <- (freq_pred / test$Exposure) * sev_pred
+
+# Predicting on Test Set - Tweedie
+tweedie_pred <- predict(tweedie_glm16,
+                        newdata = test,
+                        type = "response")
+
+# Computing true pure premium
+pp_actual = test$PurePremium
+
+# Portfolio-level comparisons
+total_actual = sum(pp_actual * test$Exposure)
+total_fs = sum(pp_pred_freqsev * test$Exposure)
+total_tweedie = sum(tweedie_pred * test$Exposure)
+
+# Printing actual, FreqxSev, Tweedie pure premiums
+cat("Test Set - Portfolio Level Comparison: ", "\n")
+cat("Actual total premium amount: ", total_actual, "\n")
+cat("Predicted FreqxSev amount: ", total_fs, ", Ratio of actual: ", total_fs/total_actual, "\n")
+cat("Predicted Tweedie amount: ", total_tweedie, ", Ratio of actual: ", total_tweedie/total_actual, "\n")
+
+# Weighted Mean Absolute Error
+weights = test$Exposure
+MAE_fs = weighted.mean(abs(pp_actual - pp_pred_freqsev), weights)
+MAE_tweedie = weighted.mean(abs(pp_actual - tweedie_pred), weights)
+cat("MAE: FreqxSev: ", MAE_fs, "\n")
+cat("MAE: Tweedie: ", MAE_tweedie)
+
+--------------------------
+
+# Pure Premium bar graph
+# Legend for FreqxSev, Tweedie, and Observed
+# Bar plots for DrivAge, BonusMalus, VehAge,
+# VehPower, Area, and VehGas
+
+observed <- test$Claim.Amount / test$Exposure
+
+vars <- c(
+  "Driver Age" = "DrivAgeBand",
+  "Bonus/Malus" = "BonusMalusBand",
+  "Vehicle Age" = "VehAgeBand",
+  "Vehicle Power" = "VehPowerBand",
+  "Area" = "Area",
+  "Vehicle Gas Type" = "VehBrand"
+)
+
+all_plots <- map2_dfr(
+  names(vars),
+  vars,
+  ~{
+    var_name <- .x
+    var_col  <- .y
+
+    data_pp <- data.frame(
+      Band = test[[var_col]],
+      Observed = observed,
+      FreqSev = pp_pred_freqsev,
+      Tweedie = tweedie_pred
+    )
+
+  data_pp <- data_pp %>%
+      mutate(
+        Band = case_when(
+          var_col == "BonusMalusBand" ~ factor(
+            as.character(Band),
+            levels = c("50-60","61-70","71-80","81-90","91-100","101-150")
+          ),
+          var_col == "VehAgeBand" ~ factor(
+            as.character(Band),
+            levels = c("0-1","2-4","5-7","8-10","11-20","21+")
+          ),
+          var_col == "VehPowerBand" ~ factor(
+            as.character(Band),
+            levels = c("5-7","4-5","7-10","10+")
+          ),
+          TRUE ~ factor(as.character(Band))
+        )
+      )
+
+    data_pp %>%
+      filter(!is.na(Band)) %>%
+      group_by(Band) %>%
+      summarise(
+        Observed = mean(Observed),
+        FreqSev = mean(FreqSev),
+        Tweedie = mean(Tweedie),
+        .groups = "drop"
+      ) %>%
+      pivot_longer(
+        cols = c(Observed, FreqSev, Tweedie),
+        names_to = "Model",
+        values_to = "PurePremium"
+      ) %>%
+      mutate(Variable = var_name)
+  }
+)
+
+ggplot(all_plots,
+       aes(x = Band,
+           y = PurePremium,
+           fill = Model)) +
+  geom_col(
+    position = position_dodge(width = 0.8),
+    width = 0.7
+  ) +
+  scale_fill_manual(
+    values = c(
+      Observed = "darkseagreen2",
+      FreqSev = "coral",
+      Tweedie = "cyan4"
+    )
+  ) +
+  facet_wrap(
+    ~Variable,
+    nrow = 2,
+    ncol = 3,
+    scales = "free_x"
+  ) +
+  labs(
+    x = NULL,
+    y = "Pure Premium"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.title = element_blank(),
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1
+    ),
+    strip.text = element_text(
+      size = 13,
+      face = "bold"
+    )
+  )
+
+--------------------------
+
