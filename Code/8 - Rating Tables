@@ -1,0 +1,334 @@
+8 - Rating Tables
+Dashed lines indicate the cutoff for each code block.
+
+---------- CODE ----------
+
+# Base Frequency 
+# Poisson Rating Table
+# Each table will have the relativity for each feature band as well
+# as their significance level
+cat("Base Frequency: ", exp(coef(FreqPoisson)[1]))
+
+poiscoef_sum <- coef(poistable)
+idx <- grepl("^DrivAgeBand", rownames(poiscoef_sum))
+age_coefs <- poiscoef_sum[idx, ]
+rel_age <- exp(age_coefs[, "Estimate"])
+pval_age <- age_coefs[, "Pr(>|z|)"]
+
+stars_age <- symnum(
+  pval_age,
+  corr = FALSE,
+  cutpoints = c(0, .001, .01, .05, .1, 1),
+  symbols = c("***", "**", "*", ".", "")
+)
+
+age_rating <- data.frame(
+  Relativity = round(rel_age, 4),
+  Signif = stars_age
+)
+
+ref_age <- data.frame(
+  Relativity = 1,
+  Signif = ""
+)
+rownames(ref_age) <- "(reference level)"
+
+age_rating <- rbind(ref_age, age_rating)
+rownames(age_rating)[-1] <- sub("^DrivAgeBand", "", rownames(age_rating)[-1])
+age_rating
+
+# Vehicle Age Rating Table
+idx_vehage <- grepl("^VehAgeBand", rownames(poiscoef_sum))
+vehage_coefs <- poiscoef_sum[idx_vehage, ]
+rel_vehage <- exp(vehage_coefs[, "Estimate"])
+pval_vehage <- vehage_coefs[, "Pr(>|z|)"]
+
+stars_vehage <- symnum(
+  pval_vehage,
+  corr = FALSE,
+  cutpoints = c(0, .001, .01, .05, .1, 1),
+  symbols = c("***", "**", "*", ".", "")
+)
+
+vehage_rating <- data.frame(
+  Relativity = round(rel_vehage, 4),
+  Signif = stars_vehage
+)
+
+ref_vehage <- data.frame(
+  Relativity = 1,
+  Signif = ""
+)
+rownames(ref_vehage) <- "(reference level)"
+
+vehage_rating <- rbind(ref_vehage, vehage_rating)
+rownames(vehage_rating)[-1] <- sub("^VehAgeBand", "", rownames(vehage_rating)[-1])
+vehage_rating
+
+# Bonus/Malus Rating Table
+idx_bm <- grepl("^BonusMalusBand", rownames(poiscoef_sum))
+bm_coefs <- poiscoef_sum[idx_bm, ]
+rel_bm <- exp(bm_coefs[, "Estimate"])
+pval_bm <- bm_coefs[, "Pr(>|z|)"]
+
+stars_bm <- symnum(
+  pval_bm,
+  corr = FALSE,
+  cutpoints = c(0, .001, .01, .05, .1, 1),
+  symbols = c("***", "**", "*", ".", "")
+)
+
+bm_rating <- data.frame(
+  Relativity = round(rel_bm, 4),
+  Signif = stars_bm
+)
+
+ref_bm <- data.frame(
+  Relativity = 1,
+  Signif = ""
+)
+rownames(ref_bm) <- "(reference level)"
+
+bm_rating <- rbind(ref_bm, bm_rating)
+rownames(bm_rating)[-1] <- sub("^BonusMalusBand", "", rownames(bm_rating)[-1])
+bm_rating
+
+# Vehicle Power Rating Table
+idx_vp <- grepl("^VehPowerBand", rownames(poiscoef_sum))
+vp_coefs <- poiscoef_sum[idx_vp, ]
+rel_vp <- exp(vp_coefs[, "Estimate"])
+pval_vp <- vp_coefs[, "Pr(>|z|)"]
+
+stars_vp <- symnum(
+  pval_vp,
+  corr = FALSE,
+  cutpoints = c(0, .001, .01, .05, .1, 1),
+  symbols = c("***", "**", "*", ".", "")
+)
+
+vp_rating <- data.frame(
+  Relativity = round(rel_vp, 4),
+  Signif = stars_vp
+)
+
+ref_vp <- data.frame(
+  Relativity = 1,
+  Signif = ""
+)
+rownames(ref_vp) <- "(reference level)"
+
+vp_rating <- rbind(ref_vp, vp_rating)
+rownames(vp_rating)[-1] <- sub("^VehPowerBand", "", rownames(vp_rating)[-1])
+vp_rating
+
+# Area Rating Table
+idx_area <- grepl("^Area", rownames(poiscoef_sum))
+area_coefs <- poiscoef_sum[idx_area, ]
+rel_area <- exp(area_coefs[, "Estimate"])
+pval_area <- area_coefs[, "Pr(>|z|)"]
+
+stars_area <- symnum(
+  pval_area,
+  corr = FALSE,
+  cutpoints = c(0, .001, .01, .05, .1, 1),
+  symbols = c("***", "**", "*", ".", "")
+)
+
+area_rating <- data.frame(
+  Relativity = round(rel_area, 4),
+  Signif = stars_area
+)
+
+ref_area <- data.frame(
+  Relativity = 1,
+  Signif = ""
+)
+rownames(ref_area) <- "(reference level)"
+
+area_rating <- rbind(ref_area, area_rating)
+rownames(area_rating)[-1] <- sub("^Area", "", rownames(area_rating)[-1])
+area_rating
+
+# Vehicle Type Rating Table
+idx_vb <- grepl("^VehBrand", rownames(poiscoef_sum))
+vb_coefs <- poiscoef_sum[idx_vb, ]
+rel_vb <- exp(vb_coefs[, "Estimate"])
+pval_vb <- vb_coefs[, "Pr(>|z|)"]
+
+stars_vb <- symnum(
+  pval_vb,
+  corr = FALSE,
+  cutpoints = c(0, .001, .01, .05, .1, 1),
+  symbols = c("***", "**", "*", ".", "")
+)
+
+vb_rating <- data.frame(
+  Relativity = round(rel_vb, 4),
+  Signif = stars_vb
+)
+
+ref_vb <- data.frame(
+  Relativity = 1,
+  Signif = ""
+)
+rownames(ref_vb) <- "(reference level)"
+
+vb_rating <- rbind(ref_vb, vb_rating)
+rownames(vb_rating)[-1] <- sub("^VehBrand", "", rownames(vb_rating)[-1])
+vb_rating
+
+--------------------------
+
+# Final Rating Relativities for frequency, severity,
+# among bands for DrivAge, VehAge, Area, VehPower,
+# BonusMalus, and VehGas
+
+models <- list(
+  Frequency = FreqPoisson,
+  Severity = sevGamma,
+  Tweedie = tweedie_glm16
+)
+
+cat_vars <- c(
+  "DrivAgeBand",
+  "VehAgeBand",
+  "Area",
+  "VehPowerBand",
+  "BonusMalusBand",
+  "VehBrand"
+)
+
+# Obtain relativities for each models' coefficients
+get_rel <- function(model, var) {
+  coefs <- coef(summary(model))
+  idx <- grepl(paste0("^", var), rownames(coefs))
+
+  rel <- exp(coefs[idx, "Estimate"])
+  names(rel) <- sub(paste0("^", var), "", names(rel))
+  rel
+}
+
+# Compile relativities for each categorical variable from
+# every fitted model into a data frame
+plot_df <- bind_rows(
+  lapply(cat_vars, function(v) {
+    bind_rows(
+      lapply(names(models), function(m) {
+        data.frame(
+          Variable = v,
+          Level = names(get_rel(models[[m]], v)),
+          Relativity = as.numeric(get_rel(models[[m]], v)),
+          Model = m
+        )
+      })
+    )
+  })
+)
+
+# Adding base class for each categorical feature
+base_levels <- data.frame(
+  Variable = c(
+    "Area",
+    "BonusMalusBand",
+    "DrivAgeBand",
+    "VehAgeBand",
+    "VehPowerBand",
+    "VehBrand"
+  ),
+  Level = c(
+    "A",
+    "50-60",
+    "18-25",
+    "0-1",
+    "4-5",
+    "B1"
+  )
+)
+
+# Merging base levels from each categorical variable
+base_df <- merge(
+  base_levels,
+  data.frame(Model = names(models)),
+  by = NULL
+)
+
+# Relativity for each base level is 1
+base_df$Relativity <- 1
+
+# Appends base levels and the others
+plot_df <- bind_rows(base_df, plot_df)
+
+# Express BonusMalus, VehAge, VehPower as factors
+# for plotting
+plot_df <- plot_df %>%
+  mutate(
+    Level = case_when(
+      Variable == "BonusMalusBand" ~ factor(
+        as.character(Level),
+        levels = c("50-60","61-70","71-80","81-90","91-100","101-150")
+      ),
+
+      Variable == "VehAgeBand" ~ factor(
+        as.character(Level),
+        levels = c("0-1","2-4","5-7","8-10","11-20","21+")
+      ),
+
+      Variable == "VehPowerBand" ~ factor(
+        as.character(Level),
+        levels = c("4-5","5-7","7-10","10+")
+      ),
+
+      TRUE ~ factor(as.character(Level))
+    )
+  )
+
+# Dashed line at 1 is the base relativity
+ggplot(plot_df,
+       aes(x = Level,
+           y = Relativity,
+           fill = Model)) +
+  geom_col(position = "dodge") +
+  geom_hline(yintercept = 1,
+             colour = "red",
+             linetype = "dashed") +
+  facet_wrap(~ Variable, scales = "free_x") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+--------------------------
+
+# Example Policy: 45 year-old driver, BonusMalus 60, VehAge 8 years, VehPower 5, Area E, VehBrand B12, Medium Density, Diesel
+
+policy_ex <- data.frame(
+  DrivAgeBand = "36-45",
+  BonusMalusBand = "50-60",
+  VehAgeBand = "8-10",
+  Area = "E",
+  VehBrand = "B12",
+  VehPowerBand = "5-7",
+  VehGas = "Diesel",
+  DensityBand = "Medium",
+  Claim.Amount = 0,
+  AvgClaimAmount = 0,
+  PurePremium = 0,
+  ClaimNb = 0,
+  Exposure = 1
+)
+
+# Output expected frequency, average severity, and pure premium
+pred_freq_ex <- predict(FreqPoisson, 
+                        newdata = policy_ex,
+                        type = "response")
+
+pred_sev_ex <- predict(sevGamma,
+                       newdata = policy_ex,
+                       type = "response")
+
+pred_pp_ex <- pred_freq_ex * pred_sev_ex
+cat("Expected Annual Frequency: ", pred_freq_ex, " claims per year", "\n")
+cat("Expected Average Severity: ", pred_sev_ex, "\n")
+cat("Expected Pure Premium: ", pred_pp_ex)
+
+--------------------------
