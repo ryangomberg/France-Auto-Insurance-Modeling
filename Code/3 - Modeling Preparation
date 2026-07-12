@@ -1,0 +1,58 @@
+3 - Modeling Prepration
+Dashed lines indicate the cutoff for each code block.
+
+----------- CODE -----------
+
+# Grouping Vehicle Age
+df$VehAgeBand <- as.numeric(as.character(df$VehAge))
+df$VehAgeBand <- cut(
+  df$VehAge,
+  breaks = c(-Inf, 1, 4, 7, 10, 20, Inf),
+  labels = c("0-1", "2-4", "5-7", "8-10", "11-20", "21+"),
+  include.lowest = TRUE
+)
+
+# Grouping Vehicle Power
+df$VehPowerBand <- as.numeric(as.character(df$VehPower))
+df$VehPowerBand <- cut(
+  df$VehPower,
+  breaks = c(-Inf, 5, 7, 10, Inf),
+  labels = c("4-5", "5-7", "7-10", "10+"),
+  include.lowest = TRUE
+)
+
+# Grouping Density as an Ordinal Variable
+df$DensityBand <- as.numeric(as.character(df$Density))
+df$DensityBand <- cut(
+  df$Density,
+  breaks = 5,
+  labels = c("Low", "Low-Medium", "Medium", "Medium-High", "High"),
+  include.lowest = TRUE
+)
+
+# Count distribution over VehAge and DrivAge bands
+VehAgeFreq = df %>%
+  count(VehAgeBand)
+VehAgeFreq
+
+DrivAgeFreq = df %>%
+  count(DrivAgeBand)
+DrivAgeFreq
+
+----------------------------
+
+set.seed(124)
+
+# Removing extraneous features and features with added bands
+df_drop <- df %>% dplyr::select(-BonusMalus, -DrivAge, -VehAge, -VehPower, -Density, -Frequency, -LogDensity, -IDpol, -Region)
+
+# 80%/20% Train/Test split, stratifying by ClaimNb
+df_split <- initial_split(df_drop, prop = 0.80, strata = ClaimNb)
+train = training(df_split)
+test = testing(df_split)
+
+# Comparing train/test portfolio frequency
+cat("Training Claim Frequency: ", sum(train$ClaimNb) / sum(train$Exposure), "\n")
+cat("Test Claim Frequency: ", sum(test$ClaimNb) / sum(test$Exposure))
+
+----------------------------
