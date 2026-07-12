@@ -1,0 +1,168 @@
+Exploratory Data Analysis
+Dashed lines indicate the cutoff for each code block.
+
+----------CODE------------
+
+# ClaimNb Bar Graph (Count)
+ggplot(df, aes(x = ClaimNb)) +
+  geom_bar(color = "black", fill = "skyblue", width = 0.5) +
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5)
+
+# Claim Frequency table
+Freq = df %>%
+  count(ClaimNb)
+Freq
+
+---------------------------
+
+# Adding bands to DrivAge and BonusMalus
+df$DrivAgeBand <- as.numeric(as.character(df$DrivAge))
+df$DrivAgeBand <- cut(
+  df$DrivAge,
+  breaks = c(-Inf, 25, 35, 45, 55, 65, 75, Inf),
+  labels = c("18-25", "26-35", "36-45", "46-55", "56-65", "66-75", "75+"),
+  include.lowest = TRUE
+)
+
+df$BonusMalusBand <- cut(
+  as.numeric(df$BonusMalus),
+  breaks = c(-Inf, 60, 70, 80, 90, 100, Inf),
+  labels = c("50-60", "61-70", "71-80", "81-90", "91-100", "101-150"),
+  include.lowest = TRUE
+)
+
+# Observed Frequency by Rating Factor chart for:
+# Area, DrivAge, BonusMalus, VehPower, VehGas
+area_freq <- df %>%
+  group_by(Area) %>%
+  summarise(
+    Frequency = sum(ClaimNb) / sum(Exposure),
+    Exposure = sum(Exposure)
+  )
+
+da_freq <- df %>%
+  group_by(DrivAgeBand) %>%
+  summarise(
+    Frequency = sum(ClaimNb) / sum(Exposure),
+    Exposure = sum(Exposure)
+  )
+
+bm_freq <- df %>%
+  group_by(BonusMalusBand) %>%
+  summarise(
+    Frequency = sum(ClaimNb) / sum(Exposure),
+    Exposure = sum(Exposure)
+  )
+
+vp_freq <- df %>%
+  group_by(VehPower) %>%
+  summarise(
+    Frequency = sum(ClaimNb) / sum(Exposure),
+    Exposure = sum(Exposure)
+  )
+
+vg_freq <- df %>%
+  group_by(VehGas) %>%
+  summarise(
+    Frequency = sum(ClaimNb) / sum(Exposure),
+    Exposure = sum(Exposure)
+  )
+
+scale <- max(area_freq$Exposure) / max(area_freq$Frequency)
+ggplot(area_freq, aes(x = Area)) +
+  geom_col(aes(y = Exposure / scale), fill = "grey", width = 0.8) +
+  geom_line(aes(y = Frequency, group = 1), color = "skyblue", linewidth = 1) +
+  geom_point(aes(y = Frequency), color = "skyblue", size = 2) +
+  geom_hline(yintercept = sum(df$ClaimNb)/sum(df$Exposure), color = "red", linetype = "dashed") +
+  scale_y_continuous(
+    name = "Claim Frequency",
+    sec.axis = sec_axis(~ . * scale, name = "Exposure")
+  )
+
+ggplot(da_freq, aes(x = DrivAgeBand)) +
+  geom_col(aes(y = Exposure / scale), fill = "grey", width = 0.7) +
+  geom_line(aes(y = Frequency, group = 1), color = "skyblue", linewidth = 1) +
+  geom_point(aes(y = Frequency), color = "skyblue", size = 2) +
+  geom_hline(yintercept = sum(df$ClaimNb)/sum(df$Exposure), color = "red", linetype = "dashed") +
+  scale_y_continuous(
+    name = "Claim Frequency",
+    sec.axis = sec_axis(~ . * scale, name = "Exposure")
+  )
+
+ggplot(bm_freq, aes(x = BonusMalusBand)) +
+  geom_col(aes(y = Exposure / scale), fill = "grey", width = 0.8) +
+  geom_line(aes(y = Frequency, group = 1), color = "skyblue", linewidth = 1) +
+  geom_point(aes(y = Frequency), color = "skyblue", size = 2) +
+  geom_hline(yintercept = sum(df$ClaimNb)/sum(df$Exposure), color = "red", linetype = "dashed") +
+  scale_y_continuous(
+    name = "Claim Frequency",
+    sec.axis = sec_axis(~ . * scale, name = "Exposure")
+  )
+
+ggplot(vp_freq, aes(x = VehPower)) +
+  geom_col(aes(y = Exposure / scale), fill = "grey", width = 0.8) +
+  geom_line(aes(y = Frequency, group = 1), color = "skyblue", linewidth = 1) +
+  geom_point(aes(y = Frequency), color = "skyblue", size = 2) +
+  geom_hline(yintercept = sum(df$ClaimNb)/sum(df$Exposure), color = "red", linetype = "dashed") +
+  scale_y_continuous(
+    name = "Claim Frequency",
+    sec.axis = sec_axis(~ . * scale, name = "Exposure")
+  )
+
+ggplot(vg_freq, aes(x = VehGas)) +
+  geom_col(aes(y = Exposure / scale), fill = "grey", width = 0.8) +
+  geom_line(aes(y = Frequency, group = 1), color = "skyblue", linewidth = 1) +
+  geom_point(aes(y = Frequency), color = "skyblue", size = 2) +
+  geom_hline(yintercept = sum(df$ClaimNb)/sum(df$Exposure), color = "red", linetype = "dashed") +
+  scale_y_continuous(
+    name = "Claim Frequency",
+    sec.axis = sec_axis(~ . * scale, name = "Exposure")
+  )
+
+----------------------------
+
+# Filtering by a positive number of claims
+posclaims <- df %>% filter(!(ClaimNb == 0))
+
+# Claim Severity Distribution over AvgClaimAmount
+ggplot(posclaims, aes(x = AvgClaimAmount)) +
+  geom_histogram(bins = 70, fill = "white", color = "black") +
+  labs(title = "Claim Severity Distribution", x = "Average Severity", 
+       y = "count")
+
+# Claim Severity Distribution over Log(AvgClaimAmount)
+LogArr <- log(posclaims$AvgClaimAmount)
+ggplot(posclaims, aes(x = LogArr)) +
+  geom_histogram(bins = 70, fill = "white", color = "black") +
+  labs(title = "Claim Severity Distribution", x = "Log Average Severity", 
+       y = "count")
+
+# For ClaimNb > 0: Mean, Median, Maximum, Standard Deviation
+cat("Severity Statistics for positive claim frequency: ", "\n")
+cat("  Mean: ", mean(posclaims$AvgClaimAmount), "\n")
+cat("  Median: ", median(posclaims$AvgClaimAmount), "\n")
+cat("  Max: ", max(posclaims$AvgClaimAmount), "\n")
+cat("  Standard Deviation: ", sd(posclaims$AvgClaimAmount))
+
+----------------------------
+
+# Initializating a fixed sample
+set.seed(123)
+
+# BonusMalus count over respective bands
+ggplot(df, aes(x = BonusMalusBand)) +
+  geom_bar(color = "black", fill = "skyblue", width = 0.5) +
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5)
+
+# BonusMalus spread over DrivAge
+sample_bm <- df |> slice_sample(prop = 0.10)
+ggplot(data = sample_bm, mapping = aes(x = DrivAge, y = BonusMalus)) +
+  geom_point(color = "blue", size = 2) +
+  labs(title = "BonusMalus vs. DrivAge (10% Sample)",
+       x = "DrivAge (in years)",
+       y = "Bonus/Malus")
+
+----------------------------
+
+
+
