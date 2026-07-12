@@ -1,5 +1,7 @@
 9 - Model Diagnostics
+Dashed lines indicate the cutoff for each code block.
 
+---------- CODE ----------
 
 # Poisson Diagnostics
 # Residual vs. Fitted
@@ -42,3 +44,188 @@ ggplot(data.frame(res), aes(x = res)) +
     x = "Deviance Residuals",
     y = "Density"
   )
+
+--------------------------
+
+# Gamma Diagnostics
+# Residual vs. Fitted
+ggplot(data.frame(
+  Fitted = fitted(sevGamma),
+  Residuals = residuals(sevGamma, type = "deviance")
+), aes(x = log(Fitted), y = Residuals)) +
+  geom_point(alpha = 0.4) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    title = "Gamma: Residuals vs. Fitted",
+    x = "Log(Fitted Values)",
+    y = "Deviance Residuals"
+  )
+
+# QQ-plot
+qqnorm(residuals(sevGamma, type = "deviance"))
+qqline(residuals(sevGamma, type = "deviance"),
+       col = "red",
+       lwd = 2)
+
+# Residual distribution
+res <- residuals(sevGamma, type = "deviance")
+
+ggplot(data.frame(res), aes(x = res)) +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 30,
+                 fill = "skyblue",
+                 color = "white",
+                 alpha = 0.8) +
+  stat_function(
+    aes(color = "N(0,1)"),
+    fun = dnorm,
+    args = list(mean = 0, sd = 1),
+    linewidth = 1
+  ) +
+  scale_color_manual(values = c("N(0,1)" = "red"), name = "") +
+  labs(
+    title = "Gamma: Residual Distribution",
+    x = "Deviance Residuals",
+    y = "Density"
+  )
+
+--------------------------
+
+# Lift Charts
+# FreqxSev
+lift_fs <- data.frame(
+  Observed = observed,
+  Predicted = pp_pred_freqsev
+) %>%
+  mutate(
+    Decile = ntile(Predicted, 10)
+  ) %>%
+  group_by(Decile) %>%
+  summarise(
+    Actual = mean(Observed, na.rm = TRUE),
+    Predicted = mean(Predicted, na.rm = TRUE)
+  )
+
+lift_long <- lift_fs %>%
+  pivot_longer(-Decile,
+               names_to = "Type",
+               values_to = "Premium")
+
+ggplot(lift_long,
+       aes(x = factor(Decile),
+           y = Premium,
+           fill = Type)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Lift Chart — Frequency × Severity",
+    x = "Predicted Premium Decile (1 = cheapest, 10 = most expensive)",
+    y = "Average Pure Premium"
+  ) +
+  theme_minimal()
+
+lift_tw <- data.frame(
+  Observed = observed,
+  Predicted = tweedie_pred
+) %>%
+  mutate(
+    Decile = ntile(Predicted, 10)
+  ) %>%
+  group_by(Decile) %>%
+  summarise(
+    Actual = mean(Observed, na.rm = TRUE),
+    Predicted = mean(Predicted, na.rm = TRUE)
+  )
+
+# Tweedie
+lift_long <- lift_tw %>%
+  pivot_longer(-Decile,
+               names_to = "Type",
+               values_to = "Premium")
+
+ggplot(lift_long,
+       aes(x = factor(Decile),
+           y = Premium,
+           fill = Type)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Lift Chart — Tweedie",
+    x = "Predicted Premium Decile (1 = cheapest, 10 = most expensive)",
+    y = "Average Pure Premium"
+  ) +
+  theme_minimal()
+
+--------------------------
+
+# Lorenz Curve and Gini Coefficient Estimation
+lorenz_curve <- function(exposure, claims, prediction) {
+
+  df <- data.frame(
+    Exposure = exposure,
+    Claims = claims,
+    Prediction = prediction
+  )
+
+  df <- df[order(df$Prediction), ]
+
+  df$CumExposure <- cumsum(df$Exposure) / sum(df$Exposure)
+  df$CumClaims   <- cumsum(df$Claims) / sum(df$Claims)
+
+  df
+}
+
+freq_curve <- lorenz_curve(
+  exposure = test$Exposure,
+  claims = test$Claim.Amount,
+  prediction = pp_pred_freqsev
+)
+
+tweed_curve <- lorenz_curve(
+  exposure = test$Exposure,
+  claims = test$Claim.Amount,
+  prediction = tweedie_pred
+)
+
+lorenz_gini <- function(curve) {
+
+  x <- c(0, curve$CumExposure)
+  y <- c(0, curve$CumClaims)
+
+  area <- sum(diff(x) * (head(y,-1) + tail(y,-1))/2)
+  1 - 2 * area
+}
+
+gini_freq <- lorenz_gini(freq_curve)
+gini_tweed <- lorenz_gini(tweed_curve)
+
+cat("FreqxSev Gini: ", gini_freq, "\n")
+cat("Tweedie (p = 1.6) Gini: ", gini_tweed, "\n")
+
+ggplot() +
+  geom_line(aes(x = c(0,1), y = c(0,1)),
+            linetype = "dashed",
+            color = "gray50") +
+
+  geom_line(data = freq_curve,
+            aes(CumExposure, CumClaims,
+                color = "Freq × Sev"),
+            linewidth = 1.2) +
+
+  geom_line(data = tweed_curve,
+            aes(CumExposure, CumClaims,
+                color = "Tweedie"),
+            linewidth = 1.2) +
+
+  scale_color_manual(values = c(
+    "Freq × Sev" = "#2C7FB8",
+    "Tweedie" = "#C51B7D"
+  )) +
+
+  labs(
+    title = "Ordered Lorenz Curves",
+    x = "Cumulative Share of Exposure",
+    y = "Cumulative Share of Claims",
+    color = ""
+  ) 
+
+--------------------------
+
