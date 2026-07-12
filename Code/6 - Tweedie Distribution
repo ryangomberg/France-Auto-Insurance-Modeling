@@ -1,1 +1,52 @@
 6 - Tweedie Distribution
+Dashed lines indicate the cutoff for each code block.
+
+---------- CODE ----------
+
+# Fitting Tweedie models over varying powers
+# Powers to be compared: 1.1, 1.3. 1.5, 1.6
+# Removing structurally related variables
+# Uses Exposures as weights
+# Log-link
+
+tweedie_glm11 <- glm(PurePremium ~  . - Exposure - ClaimNb - AvgClaimAmount - Claim.Amount,
+               weights = Exposure,
+               family = tweedie(var.power = 1.1, link.power = 0),
+               data = train)
+
+tweedie_glm13 <- glm(PurePremium ~  . - Exposure - ClaimNb - AvgClaimAmount - Claim.Amount,
+               weights = Exposure,
+               family = tweedie(var.power = 1.3, link.power = 0),
+               data = train)
+
+tweedie_glm15 <- glm(PurePremium ~  . - Exposure - ClaimNb - AvgClaimAmount - Claim.Amount,
+               weights = Exposure,
+               family = tweedie(var.power = 1.5, link.power = 0),
+               data = train)
+
+tweedie_glm16 <- glm(PurePremium ~  . - Exposure - ClaimNb - AvgClaimAmount - Claim.Amount,
+               weights = Exposure,
+               family = tweedie(var.power = 1.6, link.power = 0),
+               data = train)
+
+--------------------------
+
+# Comparing deviances between the Tweedie models
+powers <- c(1.1, 1.3, 1.5, 1.6)
+deviances <- c(
+  deviance(tweedie_glm11),
+  deviance(tweedie_glm13),
+  deviance(tweedie_glm15),
+  deviance(tweedie_glm16)
+)
+
+best_power <- which.min(deviances)
+
+cat("Deviance Statistic Comparisons at varying Tweedie powers", "\n")
+cat("Power = 1.1: ", deviance(tweedie_glm11), "\n")
+cat("Power = 1.3: ", deviance(tweedie_glm13), "\n")
+cat("Power = 1.5: ", deviance(tweedie_glm15), "\n")
+cat("Power = 1.6: ", deviance(tweedie_glm16), "\n")
+cat("Best power: ", powers[best_power], "\n")
+
+--------------------------
