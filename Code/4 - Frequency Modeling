@@ -1,0 +1,303 @@
+4 - Frequency Modeling
+Dashed lines indicate the cutoff for each code block.
+
+---------- CODE ----------
+
+# Building Poisson GLM, log-link
+# Removing structurally related variables
+# Add Exposure offset term
+FreqPoisson <- glm(
+  ClaimNb ~ . - Exposure - AvgClaimAmount - PurePremium - Claim.Amount,
+  offset = log(Exposure),
+  family = poisson(link = "log"),
+  data = train
+)
+
+poistable = summary(FreqPoisson)
+poistable
+
+--------------------------
+
+# Summarizing GLM Coefficients
+# Add Relativity 
+coef_table <- data.frame(
+  Variable = rownames(poistable$coefficients),
+  Coefficient = round(poistable$coefficients[, "Estimate"], 4),
+  Relativity = round(exp(poistable$coefficients[, "Estimate"]), 2),
+  `Std. Error` = round(poistable$coefficients[, "Std. Error"], 2),
+  `z value` = round(poistable$coefficients[, "z value"], 2),
+  `Pr(>|z|)` = round(poistable$coefficients[, "Pr(>|z|)"], 2)
+)
+coef_table
+
+--------------------------
+
+# Poisson (Frequency) Relativity vertical bar graphs for
+# Area, DrivAge bands, VehAge bands, BonusMalus bands,
+# VehPower bands, VehGas
+# Vertical dashed line at 1.0 is the reference 
+# relativity (no change)
+
+area_plot <- coef_table %>%
+  filter(grepl("^Area", Variable)) %>%
+  mutate(
+    Area = sub("Area", "", Variable)
+  ) %>%
+  dplyr::select(Area, Relativity)
+
+# Add base category
+area_plot <- bind_rows(
+  data.frame(Area = "A (Base)", Relativity = 1),
+  area_plot
+)
+
+# Keep areas in order
+area_plot$Area <- factor(area_plot$Area,
+                         levels = c("A (Base)","B","C","D","E","F"))
+
+xmax <- max(area_plot$Relativity)
+ggplot(area_plot,
+       aes(x = Relativity,
+           y = Area)) +
+  geom_col(fill = "skyblue") +
+  geom_vline(xintercept = 1,
+             linetype = "dashed",
+             color = "red",
+             linewidth = 0.8) +
+  coord_cartesian(xlim = c(0, xmax + 0.25)) +
+  labs(
+    x = "Relativity",
+    y = "Area",
+    title = "Area Relativities"
+  ) +
+  geom_text(aes(label = sprintf("%.3f", Relativity)),
+          family = "serif", hjust = -0.3, color = "black", size = 4) +
+  theme(text = element_text(family = "serif"))
+
+drivage_plot <- coef_table %>%
+  filter(grepl("^DrivAgeBand", Variable)) %>%
+  mutate(
+    DrivAgeBand = sub("DrivAgeBand", "", Variable)
+  ) %>%
+  dplyr::select(DrivAgeBand, Relativity)
+
+drivage_plot <- bind_rows(
+  data.frame(DrivAgeBand = "18-25 (Base)", Relativity = 1),
+  drivage_plot
+)
+
+drivage_plot$DrivAgeBand <- factor(drivage_plot$DrivAgeBand,
+                         levels = c("18-25 (Base)","26-35","36-45","46-55","56-65","66-75", "75+"))
+
+xmax_drivage <- max(drivage_plot$Relativity)
+ggplot(drivage_plot,
+       aes(x = Relativity,
+           y = DrivAgeBand)) +
+  geom_col(fill = "forestgreen") +
+  geom_vline(xintercept = 1,
+             linetype = "dashed",
+             color = "red",
+             linewidth = 0.8) +
+  coord_cartesian(xlim = c(0, xmax + 0.25)) +
+  labs(
+    x = "Relativity",
+    y = "Driver Age Bands",
+    title = "Driver Age Relativities"
+  ) +
+  geom_text(aes(label = sprintf("%.3f", Relativity)),
+          family = "serif", hjust = -0.3, color = "black", size = 4) +
+  theme(text = element_text(family = "serif"))
+
+vehage_plot <- coef_table %>%
+  filter(grepl("^VehAgeBand", Variable)) %>%
+  mutate(
+    VehAgeBand = sub("VehAgeBand", "", Variable)
+  ) %>%
+  dplyr::select(VehAgeBand, Relativity)
+
+vehage_plot <- bind_rows(
+  data.frame(VehAgeBand = "0-1 (Base)", Relativity = 1),
+  vehage_plot
+)
+
+vehage_plot$VehAgeBand <- factor(vehage_plot$VehAgeBand,
+                         levels = c("0-1 (Base)","2-4","5-7","8-10","11-20","21+"))
+
+xmax_vehage <- max(vehage_plot$Relativity)
+ggplot(vehage_plot,
+       aes(x = Relativity,
+           y = VehAgeBand)) +
+  geom_col(fill = "orange") +
+  geom_vline(xintercept = 1,
+             linetype = "dashed",
+             color = "red",
+             linewidth = 0.8) +
+  coord_cartesian(xlim = c(0, xmax + 0.25)) +
+  labs(
+    x = "Relativity",
+    y = "Vehicle Age Bands",
+    title = "Vehicle Age Relativities"
+  ) +
+  geom_text(aes(label = sprintf("%.3f", Relativity)),
+          family = "serif", hjust = -0.3, color = "black", size = 4) +
+  theme(text = element_text(family = "serif"))
+
+bm_plot <- coef_table %>%
+  filter(grepl("^BonusMalusBand", Variable)) %>%
+  mutate(
+    BonusMalusBand = sub("BonusMalusBand", "", Variable)
+  ) %>%
+  dplyr::select(BonusMalusBand, Relativity)
+
+bm_plot <- bind_rows(
+  data.frame(BonusMalusBand = "50-60 (Base)", Relativity = 1),
+  bm_plot
+)
+
+bm_plot$BonusMalusBand <- factor(bm_plot$BonusMalusBand,
+                         levels = c("50-60 (Base)","61-70","71-80","81-90","91-100","101-150"))
+
+xmax_bm <- max(bm_plot$Relativity)
+ggplot(bm_plot,
+       aes(x = Relativity,
+           y = BonusMalusBand)) +
+  geom_col(fill = "aquamarine") +
+  geom_vline(xintercept = 1,
+             linetype = "dashed",
+             color = "red",
+             linewidth = 0.8) +
+  coord_cartesian(xlim = c(0, xmax + 4)) +
+  labs(
+    x = "Relativity",
+    y = "Bonus/Malus Bands",
+    title = "Bonus/Malus Relativities"
+  ) +
+  geom_text(aes(label = sprintf("%.3f", Relativity)),
+          family = "serif", hjust = -0.3, color = "black", size = 4) +
+  theme(text = element_text(family = "serif"))
+
+vehpow_plot <- coef_table %>%
+  filter(grepl("^VehPowerBand", Variable)) %>%
+  mutate(
+    VehPowerBand = sub("VehPowerBand", "", Variable)
+  ) %>%
+  dplyr::select(VehPowerBand, Relativity)
+
+vehpow_plot <- bind_rows(
+  data.frame(VehPowerBand = "4-5 (Base)", Relativity = 1),
+  vehpow_plot
+)
+
+vehpow_plot$VehPowerBand <- factor(vehpow_plot$VehPowerBand,
+                        levels = c("4-5 (Base)","5-7", "7-10", "10+"))
+
+xmax_vp <- max(vehpow_plot$Relativity)
+ggplot(vehpow_plot,
+       aes(x = Relativity,
+           y = VehPowerBand)) +
+  geom_col(fill = "darkgrey") +
+  geom_vline(xintercept = 1,
+             linetype = "dashed",
+             color = "red",
+             linewidth = 0.8) +
+  coord_cartesian(xlim = c(0, xmax + 0.25)) +
+  labs(
+    x = "Relativity",
+    y = "Vehicle Power Bands",
+    title = "Vehicle Power Relativities"
+  ) +
+  geom_text(aes(label = sprintf("%.3f", Relativity)),
+          family = "serif", hjust = -0.3, color = "black", size = 4) +
+  theme(text = element_text(family = "serif"))
+
+vehgas_plot <- coef_table %>%
+  filter(grepl("^VehGas", Variable)) %>%
+  mutate(
+    VehGasBand = sub("VehGas", "", Variable)
+  ) %>%
+  dplyr::select(VehGasBand, Relativity)
+
+vehgas_plot <- bind_rows(
+  data.frame(VehGasBand = "Diesel (Base)", Relativity = 1),
+  vehgas_plot
+)
+
+vehgas_plot$VehGasBand <- factor(vehgas_plot$VehGasBand,
+                         levels = c("Diesel (Base)","Regular"))
+
+xmax_vg <- max(vehgas_plot$Relativity)
+ggplot(vehgas_plot,
+       aes(x = Relativity,
+           y = VehGasBand)) +
+  geom_col(fill = "purple") +
+  geom_vline(xintercept = 1,
+             linetype = "dashed",
+             color = "red",
+             linewidth = 0.8) +
+  coord_cartesian(xlim = c(0, xmax + 0.25)) +
+  labs(
+    x = "Relativity",
+    y = "Vehicle Gas Type",
+    title = "Vehicle Gas Type Relativities"
+  ) +
+  geom_text(aes(label = sprintf("%.3f", Relativity)),
+          family = "serif", hjust = -0.3, color = "black", size = 4) +
+  theme(text = element_text(family = "serif"))
+  
+--------------------------
+
+# Poisson GLM - Overdispersion parameter and
+# checking for significance
+dispersiontest(FreqPoisson, alternative = "greater")
+
+--------------------------
+
+# Fitting Negative Binomial GLM with log-link
+# Removing structurally related variables
+# Add Exposure offset term
+FreqNB <- glm.nb(ClaimNb ~ . - Exposure - PurePremium - AvgClaimAmount - Claim.Amount + offset(log(Exposure)), data = train)
+nbtable <- summary(FreqNB)
+
+--------------------------
+
+# Summarizing Negative Binomial GLM Coefficients
+coef_table_nb <- data.frame(
+  Variable = rownames(nbtable$coefficients),
+  Coefficient = round(nbtable$coefficients[, "Estimate"], 4),
+  Relativity = round(exp(nbtable$coefficients[, "Estimate"]), 2),
+  `Std. Error` = round(nbtable$coefficients[, "Std. Error"], 2),
+  `z value` = round(nbtable$coefficients[, "z value"], 2),
+  `Pr(>|z|)` = round(nbtable$coefficients[, "Pr(>|z|)"], 2)
+)
+coef_table_nb
+
+--------------------------
+
+# Negative binomial - Overdispersion parameter and
+# checking for significance
+
+check_overdispersion(FreqNB)
+
+--------------------------
+
+# Relativity comparison between Poisson and Negative Binomial
+
+relativity_comp <- data.frame(
+  PoissonRelativity = round(exp(poistable$coefficients[, "Estimate"]), 2),
+  NBRelativity = round(exp(nbtable$coefficients[, "Estimate"]), 2))
+relativity_comp
+
+--------------------------
+
+# AIC extraction from Poisson and Negative Binomial
+# Output the model with the lowest AIC
+
+cat("Poisson AIC: ", AIC(FreqPoisson), "\n")
+cat("Negative Binomial AIC: ", AIC(FreqNB), "\n")
+if(AIC(FreqPoisson) > AIC(FreqNB)) {
+  cat("Better Model: Negative Binomial")
+} else {
+  cat("Better model: Poisson")
+}
+
+--------------------------
