@@ -1,0 +1,212 @@
+10 - Model Comparison and Summary
+Dashed lines indicate the cutoff for each code block.
+
+---------- CODE ----------
+
+# Model comparison tables
+cat("GOODNESS-OF-FIT METRICS - MODEL COMPARISON", "\n")
+
+# Pearson chi-squared calculation
+pearson_chisq <- function(model) {
+  sum(residuals(model, type = "pearson")^2)
+}
+
+# Family, Link, Number of parameters, Log-likelihood, 
+# deviance, AIC, BIC, DfResidual, DfModel
+model_summary <- data.frame(
+  Model = c("Poisson", "Gamma", "Tweedie (p=1.6)"),
+  Target = c("Frequency", "Severity", "Pure Premium"),
+  Family = c(
+    FreqPoisson$family$family,
+    sevGamma$family$family,
+    tweedie_glm16$family$family
+  ),
+  Link = c(
+    FreqPoisson$family$link,
+    sevGamma$family$link,
+    tweedie_glm16$family$link
+  ),
+  NumParams = c(
+    length(coef(FreqPoisson)),
+    length(coef(sevGamma)),
+    length(coef(tweedie_glm16))
+  ),
+  LogLikelihood = c(
+    round(as.numeric(logLik(FreqPoisson)), 1),
+    round(as.numeric(logLik(sevGamma)), 1),
+    "-"
+  ),
+  Deviance = c(
+    round(deviance(FreqPoisson), 1),
+    round(deviance(sevGamma), 1),
+    round(deviance(tweedie_glm16), 1)
+  ),
+  AIC = c(
+    round(AIC(FreqPoisson), 1),
+    round(AIC(sevGamma), 1),
+    "-"
+  ),
+  BIC = c(
+    round(BIC(FreqPoisson), 1),
+    round(BIC(sevGamma), 1),
+    "-"
+  ),
+  DfResidual = c(
+    round(df.residual(FreqPoisson), 1),
+    round(df.residual(sevGamma), 1),
+    round(df.residual(tweedie_glm16), 1)
+  ),
+  DfModel = c(
+    length(coef(FreqPoisson)) - 1,
+    length(coef(sevGamma)) - 1,
+    length(coef(tweedie_glm16)) - 1
+  )
+)
+
+model_summary$PearsonChi2 <- c(
+  pearson_chisq(FreqPoisson),
+  pearson_chisq(sevGamma),
+  pearson_chisq(tweedie_glm16)
+)
+
+model_info <- model_summary[, c("Model", "Target", "Family", "Link", "NumParams")]
+
+fit_stats <- model_summary[, c("Model", "LogLikelihood", "Deviance", "PearsonChi2")]
+
+info_stats <- model_summary[, c("Model", "AIC", "BIC", "DfResidual", "DfModel")]
+
+model_info
+fit_stats
+info_stats
+
+--------------------------
+
+# Dispersion parameter and deviance table
+diag_summary <- data.frame(
+  Model = c("Poisson", "Negative Binomial", "Gamma", "Tweedie (p=1.6)"),
+  Dispersion_Pearson = c(
+    sum(residuals(FreqPoisson, type = "pearson")^2) / df.residual(FreqPoisson),
+    sum(residuals(FreqNB, type = "pearson")^2) / df.residual(FreqNB),
+    sum(residuals(sevGamma, type = "pearson")^2) / df.residual(sevGamma),
+    sum(residuals(tweedie_glm16, type = "pearson")^2) / df.residual(tweedie_glm16)
+  ),
+  Dispersion_Deviance = c(
+    deviance(FreqPoisson) / df.residual(FreqPoisson),
+    deviance(FreqNB) / df.residual(FreqNB),
+    deviance(sevGamma) / df.residual(sevGamma),
+    deviance(tweedie_glm16) / df.residual(tweedie_glm16)
+  ),
+  Scale = c(
+    summary(FreqPoisson)$dispersion,
+    summary(FreqNB)$dispersion,
+    summary(sevGamma)$dispersion,
+    summary(tweedie_glm16)$dispersion
+  )
+)
+
+print(diag_summary, 2)
+
+--------------------------
+
+# Frequency models
+# Poisson
+freq_obs <- test$ClaimNb
+pois_dev <- FreqPoisson$deviance
+pois_mae <- mean(abs(freq_obs - freq_pred))
+pois_rmse <- sqrt(mean((freq_obs - freq_pred)^2))
+
+# Negative Binomial
+nb_dev <- FreqNB$deviance
+nb_mae <- mean(abs(freq_obs - nb_pred))
+nb_rmse <- sqrt(mean((freq_obs - freq_pred)^2))
+
+# Severity models
+# Gamma
+sev_obs <- test$Claim.Amount
+gamma_dev <- sevGamma$deviance
+gamma_mae <- mean(abs(sev_obs - sev_pred))
+gamma_rmse <- sqrt(mean((sev_obs - sev_pred)^2))
+
+# Tweedie model
+portfolio_ratio <- sum(tweedie_pred * test$Exposure) / sum(test$Claim.Amount)
+weighted_mae <- weighted.mean(abs(pp_actual - tweedie_pred),
+                              w = test$Exposure)
+
+# Printing Summary
+cat("=====================================================================\n")
+cat("TEST SET PERFORMANCE\n")
+cat("=====================================================================\n\n")
+
+cat("--- Frequency Model (Test Set) ---\n")
+cat(sprintf("%-15s %12s %10s %10s\n",
+            "", "Deviance", "MAE", "RMSE"))
+cat(sprintf("%-15s %12.1f %10.4f %10.4f\n\n",
+            "Poisson",
+            pois_dev,
+            pois_mae,
+            pois_rmse))
+
+cat("--- Severity Model (Test Set, claims > 0) ---\n")
+cat(sprintf("%-15s %12s %12s %12s\n",
+            "", "Deviance", "MAE", "RMSE"))
+cat(sprintf("%-15s %12.1f %12s %12s\n\n",
+            "Gamma",
+            gamma_dev,
+            paste0(format(round(gamma_mae,0), big.mark=",")),
+            paste0(format(round(gamma_rmse,0), big.mark=","))))
+
+cat("--- Pure Premium Model (Test Set) ---\n")
+cat(sprintf("%-15s %16s %16s \n",
+            "", "Portfolio Ratio", "Weighted MAE"))
+cat(sprintf("%-15s %16.4f %16s \n",
+            "Tweedie",
+            portfolio_ratio,
+            paste0(format(round(weighted_mae,0), big.mark=","))))
+
+--------------------------
+
+final_summary <- data.frame(
+  Model = c("Poisson", "Negative Binomial", "Gamma", "Tweedie (p=1.6)", "FreqxSev"),
+  Target = c("Frequency", "Frequency", "Severity", "Pure Premium", "Pure Premium"),
+  Distribution = c("Poisson", "Negative Binomial", "Gamma", "Tweedie (p=1.6)", "Poisson x Gamma"),
+  AIC_Train = c(
+    round(AIC(FreqPoisson), 1),
+    round(AIC(FreqNB), 1),
+    round(AIC(sevGamma), 1),
+    "-",
+    "-"
+  ),
+  BIC_Train = c(
+    round(BIC(FreqPoisson), 1),
+    round(BIC(FreqNB), 1),
+    round(BIC(sevGamma), 1),
+    "-",
+    "-"
+  ),
+  LogLik_Train = c(
+    round(as.numeric(logLik(FreqPoisson)), 1),
+    round(as.numeric(logLik(FreqNB)), 1),
+    round(as.numeric(logLik(sevGamma)), 1),
+    "-",
+    "-"
+  ),
+  Pearson_Dispersion = c(
+    round(sum(residuals(FreqPoisson, type = "pearson")^2) /
+      df.residual(FreqPoisson), 1),
+    
+    round(sum(residuals(FreqNB, type = "pearson")^2) /
+      df.residual(FreqNB), 1),
+
+    round(sum(residuals(sevGamma, type = "pearson")^2) /
+      df.residual(sevGamma), 1),
+
+    round(sum(residuals(tweedie_glm16, type = "pearson")^2) /
+      df.residual(tweedie_glm16), 1),
+    
+    "-"
+  )
+)
+
+print(final_summary, digits = 2, row.names = FALSE)
+
+--------------------------
