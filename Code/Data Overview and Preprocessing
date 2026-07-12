@@ -1,0 +1,50 @@
+Some packages may need to be installed prior to running the rest of the code.
+The .csv file to be downloaded is displayed on the main page of this repository.
+
+# Relevant packages to be used
+library(tweedie)
+library(ggplot2)
+library(tibble)
+library(actuar)
+library(dplyr)
+library(rsample)
+library(performance)
+library(AER)
+library(MASS)
+library(statmod)
+library(cplm)
+library(tidyr)
+library(purrr)
+library(tidytext)
+library(patchwork)
+
+# Removing warnings
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+# Importing dataset
+df <- read.csv("FrancePSTable.csv")
+
+# First 5 entries
+head(df, 5)
+
+# Capping potential outliers
+df <- df %>% filter(!(ClaimNb > 4 | DrivAge > 90 | BonusMalus > 150 | VehAge > 30))
+
+# Log transform on density
+df$LogDensity <- log(df$Density)
+summary(df)
+
+# Constructing Frequency, AvgClaimAmount, PurePremium columns
+df$Frequency <- df$ClaimNb / df$Exposure
+df$AvgClaimAmount <- ifelse(df$ClaimNb > 0, df$Claim.Amount / df$ClaimNb, 0)
+df$PurePremium <- df$Claim.Amount / df$Exposure
+
+# Totals
+cat("Total exposure: ", sum(df$Exposure), "\n")
+cat("Total claim count: ", sum(df$ClaimNb), "\n")
+cat("Total claim amount: ", sum(df$Claim.Amount), "\n")
+
+# Portfolio totals
+cat("Portfolio frequency: ", sum(df$ClaimNb)/sum(df$Exposure), "claims per year", "\n")
+cat("Portfolio average severity: ", sum(df$Claim.Amount)/sum(df$ClaimNb), "\n")
+cat("Portflio pure premium: ", sum(df$Claim.Amount)/sum(df$Exposure))
