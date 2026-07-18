@@ -71,7 +71,7 @@ vars <- c(
   "Vehicle Age" = "VehAgeBand",
   "Vehicle Power" = "VehPowerBand",
   "Area" = "Area",
-  "Vehicle Gas Type" = "VehBrand"
+  "Vehicle Brand" = "VehBrand"
 )
 
 all_plots <- map2_dfr(
