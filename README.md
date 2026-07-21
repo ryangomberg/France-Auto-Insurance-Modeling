@@ -1,5 +1,8 @@
 # French Auto Insurance GLM Analysis
+* Comparative actuarial pricing analysis using Frequency x Severity and Tweedie GLMs *
+
 This project develops and compares generalized linear models (GLMs) for automobile insurance pricing using an annual portfolio of 650,000+ policies from France. Poisson and Gamma GLMs were used to construct a joint model used to estimate pure premium, while a Tweedie GLM was fitted to estimate it directly. The coefficient estimates obtained from each candidate GLM were used to compute and compare relativities as well as developing rating tables. Model performance was evaluated using residual diagnostics, predictive accuracy, and risk segmentation metrics. 
+
 
 ## Technologies
 - Microsoft Excel 2021
