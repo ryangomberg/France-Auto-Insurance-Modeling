@@ -1,5 +1,10 @@
-# France-Auto-Insurance-Modeling
-Pricing Analysis on CAS French Motor Claims Data, see https://www.kaggle.com/datasets/floser/french-motor-claims-datasets-fremtpl2freq for a detailed summary of the dataset. 
+# French Auto Insurance GLM Analysis
+This project develops and compares generalized linear models (GLMs) for automobile insurance pricing using an annual portfolio of 650,000+ policies from France. Poisson and Gamma GLMs were used to construct a joint model used to estimate pure premium, while a Tweedie GLM was fitted to estimate it directly. 
+
+## Technologies
+- Microsoft Excel 2021
+- PowerQuery, often located in the Microsoft Excel ribbon
+- RStudio, version 2024.9.0.375
 
 All code is ran using R-Studio. Be sure to install the relevant packages (see Code --> Date Overview and Preprocessing) before proceeding. 
 
