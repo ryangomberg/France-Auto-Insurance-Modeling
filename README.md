@@ -86,9 +86,20 @@ France-Auto-Insurance-Modeling/
 * tidytext
 * patchwork
 
+## Report
+<img width="477" height="296" alt="GLMReadMe1" src="https://github.com/user-attachments/assets/ce4633aa-5fd3-4e98-b599-4b0301acf46e" />
+<img width="475" height="307" alt="GLMReadMe2" src="https://github.com/user-attachments/assets/798735ca-bbaf-4049-b78e-856c4ae8a334" />
+See report/FrenchMotorClaimsAnalysisRGC.pdf
 
-All code is ran using R-Studio. Be sure to install the relevant packages (see Code --> Date Overview and Preprocessing) before proceeding. 
-
-Additionally, the dataset is installable through the link: https://drive.google.com/file/d/18VEg4Zn8HShVT0AOg3by3_D31AjKTKGM/view?usp=sharing. Make sure the .csv file is in the same folder as the .R or .qmd file used to run the code blocks.
-
-Note that results may slightly vary due to a random train/test split.
+## Skills Demonstrated
+* Data Preprocessing and Cleaning
+* Exploratory Data Analysis
+* Statistical Modeling
+* Generalized Linear Models
+* Predictive Analysis
+* Model Diagnostics
+* Rating Tables
+* Insurance Pricing
+* Risk Segmentation
+* R Programming
+* Power Query
