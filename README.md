@@ -44,17 +44,19 @@ This project develops and compares generalized linear models (GLMs) for automobi
 
 ## Repository Structure
 ```
-Insurance-Pricing-GLMs/
-│
-├── data/              # (optional - if data cannot be shared)
+France-Auto-Insurance-Modeling/
+│             
 ├── code/
-│   ├── preprocessing.R
-│   ├── frequency_model.R
-│   ├── severity_model.R
-│   ├── tweedie_model.R
-│   └── diagnostics.R
-│
-├── figures/
+│   ├── 1 - Data Overview and Preprocessing
+│   ├── 2 - Exploratory Data Analyis
+│   ├── 3 - Modeling Preparation
+│   ├── 4 - Frequency Modeling
+│   └── 5 - Severity Modeling
+│   ├── 6 - Tweedie Distribution
+│   ├── 7 - Pure Premium: Relativity and Comparison
+│   ├── 8 - Rating Tables
+│   ├── 9 - Model Diagnostics
+│   └── 10 - Model Comparison and Summary
 │
 ├── report/
 │   └── Insurance_Pricing_Report.pdf
