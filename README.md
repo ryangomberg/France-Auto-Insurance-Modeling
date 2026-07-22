@@ -89,6 +89,7 @@ France-Auto-Insurance-Modeling/
 ## Report
 <img width="477" height="296" alt="GLMReadMe1" src="https://github.com/user-attachments/assets/ce4633aa-5fd3-4e98-b599-4b0301acf46e" />
 <img width="475" height="307" alt="GLMReadMe2" src="https://github.com/user-attachments/assets/798735ca-bbaf-4049-b78e-856c4ae8a334" />
+
 See report/FrenchMotorClaimsAnalysisRGC.pdf
 
 ## Skills Demonstrated
