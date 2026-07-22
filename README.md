@@ -43,6 +43,7 @@ This project develops and compares generalized linear models (GLMs) for automobi
 * Each of the two candidate models has an advantage in pricing. The Frequency × Severity model allows us to gather more information about the impact of rating factors on claim frequency and severity, whereas the Tweedie distribution only requires the construction of a single model for measuring the average pure premium
 
 ## Repository Structure
+```
 Insurance-Pricing-GLMs/
 │
 ├── data/              # (optional - if data cannot be shared)
@@ -59,6 +60,7 @@ Insurance-Pricing-GLMs/
 │   └── Insurance_Pricing_Report.pdf
 │
 └── README.md
+```
 
 ## Technologies
 ### Software
