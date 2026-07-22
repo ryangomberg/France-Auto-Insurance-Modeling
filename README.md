@@ -50,6 +50,21 @@ This project develops and compares generalized linear models (GLMs) for automobi
 * PowerQuery, often located in the Microsoft Excel ribbon
 * RStudio, version 2024.9.0.375
 ### R Libraries/Packages
+* ggplot2
+* tweedie
+* tibble
+* actuar
+* dplyr
+* rsample
+* performance
+* AER
+* MASS
+* statmod
+* cplm
+* tidyr
+* purrr
+* tidytext
+* patchwork
 
 
 All code is ran using R-Studio. Be sure to install the relevant packages (see Code --> Date Overview and Preprocessing) before proceeding. 
