@@ -59,7 +59,7 @@ France-Auto-Insurance-Modeling/
 │   └── 10 - Model Comparison and Summary
 │
 ├── report/
-│   └── Insurance_Pricing_Report.pdf
+│   └── FrenchMotorClaimsAnalysisRGC.pdf
 │
 └── README.md
 ```
