@@ -65,6 +65,9 @@ France-Auto-Insurance-Modeling/
 ```
 
 ## Technologies
+### Data
+Link to Master Frequency and Severity Table: https://drive.google.com/file/d/18VEg4Zn8HShVT0AOg3by3_D31AjKTKGM/view?usp=drive_link
+
 ### Software
 * Microsoft Excel 2021
 * PowerQuery, often located in the Microsoft Excel ribbon
