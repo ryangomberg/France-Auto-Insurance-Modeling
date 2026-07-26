@@ -48,10 +48,10 @@ France-Auto-Insurance-Modeling/
 │             
 ├── code/
 │   ├── 1 - Data Overview and Preprocessing
-│   ├── 2 - Exploratory Data Analyis
+│   ├── 2 - Exploratory Data Analysis
 │   ├── 3 - Modeling Preparation
 │   ├── 4 - Frequency Modeling
-│   └── 5 - Severity Modeling
+│   ├── 5 - Severity Modeling
 │   ├── 6 - Tweedie Distribution
 │   ├── 7 - Pure Premium: Relativity and Comparison
 │   ├── 8 - Rating Tables
