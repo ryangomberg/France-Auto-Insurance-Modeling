@@ -41,7 +41,10 @@ This project develops and compares generalized linear models (GLMs) for automobi
 * Residual diagnostics, lift charts, and ordered Lorenz curves consistently proved similar the ability to measure risk inequality between policies, even though the Tweedie model had a slightly higher Gini coefficient, thereby suggesting a modest increase in risk differentiation.
 * BonusMalus is a very significant rating factor in identifying patterns in claim frequency and severity.
 * Each of the two candidate models has an advantage in pricing. The Frequency × Severity model allows us to gather more information about the impact of rating factors on claim frequency and severity, whereas the Tweedie distribution only requires the construction of a single model for measuring the average pure premium
-** For example
+    - Underwriters may need to justify rate changes, which can be due to poor driving habits (frequency) or medical and cost inflation (severity). The Frequency x Severity           model provides this cross-sectional analysis
+    - On the other hand, the Tweedie model makes the rate-changing process easier by only needing to defend a single model instead of two. The model itself is elegantly              handled for autocalibration, forcing total predicted premiums to match total actual premiums at the portfolio level. A Frequency x Severity would have twice the                statistical assumptions and model multiplication is a harder step to justify, particularly because autocalibration is nearly impossible to achieve this way.
+
+
 
 ## Repository Structure
 ```
